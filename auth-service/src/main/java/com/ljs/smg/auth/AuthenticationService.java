@@ -17,7 +17,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void register(AuthenticationRequest request) {
+    public void register(RegisterRequest request) {
         validateAuthenticationRequest(request);
 
         var encryptedPassword = passwordEncoder.encode(request.password());
@@ -26,7 +26,7 @@ public class AuthenticationService {
         userRepository.save(user);
     }
 
-    private void validateAuthenticationRequest(AuthenticationRequest request) {
+    private void validateAuthenticationRequest(RegisterRequest request) {
         userRepository.findByUserId(request.userId())
                 .ifPresent(user -> {
                     throw new UserIdAlreadyExistsException("이미 가입된 회원입니다.");

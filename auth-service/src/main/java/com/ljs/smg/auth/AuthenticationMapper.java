@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthenticationMapper {
 
-    public User toUser(AuthenticationRequest request, String encryptedPassword) {
+    public User toUser(RegisterRequest request, String encryptedPassword) {
         return User.builder()
                 .userId(request.userId())
                 .password(encryptedPassword)

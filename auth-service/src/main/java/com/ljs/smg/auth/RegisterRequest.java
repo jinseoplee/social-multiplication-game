@@ -3,7 +3,7 @@ package com.ljs.smg.auth;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record AuthenticationRequest(
+public record RegisterRequest(
         @NotBlank(message = "아이디를 입력해 주세요.")
         String userId,
 
