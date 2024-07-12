@@ -26,6 +26,11 @@ public class GlobalExceptionHandler {
         return buildErrorResponse("password", e.getMessage());
     }
 
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handle(AuthenticationException e) {
+        return buildErrorResponse("authentication", "아이디 또는 비밀번호를 확인해 주세요.");
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handle(MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();
