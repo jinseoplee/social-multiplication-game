@@ -18,17 +18,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserIdAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handle(UserIdAlreadyExistsException e) {
-        return buildErrorResponse("userId", e.getMessage());
+        return createErrorResponse("userId", e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(PasswordException.class)
     public ResponseEntity<ErrorResponse> handle(PasswordException e) {
-        return buildErrorResponse("password", e.getMessage());
+        return createErrorResponse("password", e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handle(AuthenticationException e) {
-        return buildErrorResponse("authentication", "아이디 또는 비밀번호를 확인해 주세요.");
+        return createErrorResponse("authentication", "아이디 또는 비밀번호를 확인해 주세요.", HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -39,18 +39,18 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        return buildErrorResponse(errors);
+        return createErrorResponse(errors, HttpStatus.BAD_REQUEST);
     }
 
-    private ResponseEntity<ErrorResponse> buildErrorResponse(String field, String message) {
+    private ResponseEntity<ErrorResponse> createErrorResponse(String field, String message, HttpStatus status) {
         Map<String, String> errors = new HashMap<>();
         errors.put(field, message);
-        return buildErrorResponse(errors);
+        return createErrorResponse(errors, status);
     }
 
-    private ResponseEntity<ErrorResponse> buildErrorResponse(Map<String, String> errors) {
+    private ResponseEntity<ErrorResponse> createErrorResponse(Map<String, String> errors, HttpStatus status) {
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(status)
                 .body(new ErrorResponse(errors));
     }
 }
