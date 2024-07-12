@@ -4,6 +4,7 @@ import com.ljs.smg.exception.PasswordException;
 import com.ljs.smg.exception.UserIdAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,12 +22,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(PasswordException.class)
-    public ResponseEntity<ErrorResponse> handlePasswordNotEquals(PasswordException e) {
+    public ResponseEntity<ErrorResponse> handle(PasswordException e) {
         return buildErrorResponse("password", e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException e) {
+    public ResponseEntity<ErrorResponse> handle(MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();
         e.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
