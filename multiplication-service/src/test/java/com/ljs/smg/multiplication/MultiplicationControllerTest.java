@@ -39,7 +39,7 @@ class MultiplicationControllerTest {
     }
 
     @Test
-    public void getRandomMultiplication() throws Exception {
+    public void getRandomMultiplicationTest() throws Exception {
         // given
         given(multiplicationService.createRandomMultiplication())
                 .willReturn(new MultiplicationResponse(2, 5));
