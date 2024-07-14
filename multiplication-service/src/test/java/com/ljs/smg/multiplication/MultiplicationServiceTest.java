@@ -1,5 +1,8 @@
 package com.ljs.smg.multiplication;
 
+import com.ljs.smg.client.UserClient;
+import com.ljs.smg.client.UserExistsResponse;
+import com.ljs.smg.exception.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -21,13 +24,17 @@ class MultiplicationServiceTest {
     @Mock
     private MultiplicationMapper multiplicationMapper;
 
+    @Mock
+    private UserClient userClient;
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         multiplicationService = new MultiplicationService(
                 randomGeneratorService,
                 multiplicationAttemptRepository,
-                multiplicationMapper
+                multiplicationMapper,
+                userClient
         );
     }
 
@@ -65,9 +72,11 @@ class MultiplicationServiceTest {
                                 .build()
                 )
                 .answer(request.answer())
+                .isCorrect(true)
                 .build();
 
-        given(multiplicationMapper.toMultiplicationAttempt(request)).willReturn(attempt);
+        given(userClient.checkUserExists(userId)).willReturn(new UserExistsResponse(true));
+        given(multiplicationMapper.toMultiplicationAttempt(request, true)).willReturn(attempt);
 
         // when
         MultiplicationAttemptResponse response = multiplicationService.checkAttempt(request);
@@ -95,9 +104,11 @@ class MultiplicationServiceTest {
                                 .build()
                 )
                 .answer(request.answer())
+                .isCorrect(false)
                 .build();
 
-        given(multiplicationMapper.toMultiplicationAttempt(request)).willReturn(attempt);
+        given(userClient.checkUserExists(userId)).willReturn(new UserExistsResponse(true));
+        given(multiplicationMapper.toMultiplicationAttempt(request, false)).willReturn(attempt);
 
         // when
         MultiplicationAttemptResponse response = multiplicationService.checkAttempt(request);
@@ -105,5 +116,21 @@ class MultiplicationServiceTest {
         // then
         assertFalse(response.isCorrect());
         verify(multiplicationAttemptRepository).save(attempt);
+    }
+
+    @Test
+    public void checkAttemptWithNonExistentUserTest() {
+        // given
+        String userId = "ljs";
+        int factorA = 2;
+        int factorB = 5;
+        int answer = 10;
+
+        MultiplicationAttemptRequest request = new MultiplicationAttemptRequest(userId, factorA, factorB, answer);
+
+        given(userClient.checkUserExists(userId)).willReturn(new UserExistsResponse(false));
+
+        // when, then
+        assertThrows(UserNotFoundException.class, () -> multiplicationService.checkAttempt(request));
     }
 }
