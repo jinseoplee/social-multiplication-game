@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MultiplicationMapper {
 
-    public MultiplicationAttempt toMultiplicationAttempt(MultiplicationAttemptRequest request) {
+    public MultiplicationAttempt toMultiplicationAttempt(MultiplicationAttemptRequest request, boolean isCorrect) {
         return MultiplicationAttempt.builder()
                 .userId(request.userId())
                 .multiplication(
@@ -15,6 +15,7 @@ public class MultiplicationMapper {
                                 .build()
                 )
                 .answer(request.answer())
+                .isCorrect(isCorrect)
                 .build();
     }
 }
