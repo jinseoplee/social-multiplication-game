@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -132,5 +134,47 @@ class MultiplicationServiceTest {
 
         // when, then
         assertThrows(UserNotFoundException.class, () -> multiplicationService.checkAttempt(request));
+    }
+
+    @Test
+    public void findRecentAttemptsTest() {
+        // given
+        String userId = "ljs";
+        int factorA = 2;
+        int factorB = 5;
+        int answer = 10;
+        boolean isCorrect = true;
+
+        Multiplication multiplication = new Multiplication(1, factorA, factorB);
+        List<MultiplicationAttempt> attempts = List.of(
+                new MultiplicationAttempt(1, userId, multiplication, answer, isCorrect, null, null)
+        );
+
+        given(multiplicationAttemptRepository.findTop5ByUserIdOrderByIdDesc(userId))
+                .willReturn(attempts);
+
+        List<MultiplicationAttemptDetail> multiplications = List.of(
+                new MultiplicationAttemptDetail(1, factorA, factorB, answer, isCorrect)
+        );
+
+        RecentMultiplicationAttemptResponse expectedResponse = new RecentMultiplicationAttemptResponse(
+                userId,
+                multiplications
+        );
+
+        // when
+        RecentMultiplicationAttemptResponse actualResponse = multiplicationService.findRecentAttempts(userId);
+
+        // then
+        assertEquals(expectedResponse.userId(), actualResponse.userId());
+        assertEquals(expectedResponse.multiplications().size(), actualResponse.multiplications().size());
+
+        MultiplicationAttemptDetail expectedDetail = expectedResponse.multiplications().get(0);
+        MultiplicationAttemptDetail actualDetail = actualResponse.multiplications().get(0);
+
+        assertEquals(expectedDetail.factorA(), actualDetail.factorA());
+        assertEquals(expectedDetail.factorB(), actualDetail.factorB());
+        assertEquals(expectedDetail.answer(), actualDetail.answer());
+        assertEquals(expectedDetail.isCorrect(), actualDetail.isCorrect());
     }
 }

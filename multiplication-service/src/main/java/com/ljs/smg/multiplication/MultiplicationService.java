@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 public class MultiplicationService {
@@ -46,5 +48,23 @@ public class MultiplicationService {
     private void saveMultiplicationAttempt(MultiplicationAttemptRequest request, boolean isCorrect) {
         MultiplicationAttempt attempt = multiplicationMapper.toMultiplicationAttempt(request, isCorrect);
         multiplicationAttemptRepository.save(attempt);
+    }
+
+    @Transactional(readOnly = true)
+    public RecentMultiplicationAttemptResponse findRecentAttempts(String userId) {
+        List<MultiplicationAttempt> attempts = multiplicationAttemptRepository.findTop5ByUserIdOrderByIdDesc(userId);
+
+        List<MultiplicationAttemptDetail> multiplications = attempts
+                .stream()
+                .map(attempt -> new MultiplicationAttemptDetail(
+                        attempt.getId(),
+                        attempt.getMultiplication().getFactorA(),
+                        attempt.getMultiplication().getFactorB(),
+                        attempt.getAnswer(),
+                        attempt.isCorrect()
+                ))
+                .toList();
+
+        return new RecentMultiplicationAttemptResponse(userId, multiplications);
     }
 }
