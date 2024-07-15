@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -32,6 +34,7 @@ class MultiplicationControllerTest {
     private JacksonTester<MultiplicationResponse> json;
     private JacksonTester<MultiplicationAttemptRequest> jsonAttemptRequest;
     private JacksonTester<MultiplicationAttemptResponse> jsonAttemptResponse;
+    private JacksonTester<RecentMultiplicationAttemptResponse> jsonRecentAttemptResponse;
 
     @BeforeEach
     public void setUp() {
@@ -91,5 +94,23 @@ class MultiplicationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonAttemptRequest.write(request).getJson()))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void getRecentAttemptsTest() throws Exception {
+        // given
+        String userId = "ljs";
+        List<MultiplicationAttemptDetail> multiplications = List.of(
+                new MultiplicationAttemptDetail(1, 3, 7, 21, true)
+        );
+        RecentMultiplicationAttemptResponse response = new RecentMultiplicationAttemptResponse(userId, multiplications);
+        given(multiplicationService.findRecentAttempts(userId))
+                .willReturn(response);
+
+        // when, then
+        mvc.perform(get("/api/v1/multiplication/attempt/results/{userId}", userId)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(jsonRecentAttemptResponse.write(response).getJson()));
     }
 }
