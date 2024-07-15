@@ -16,6 +16,8 @@ spring:
           uri: lb://MULTIPLICATION-SERVICE
           predicates:
             - Path=/api/v1/multiplication/**
+          filters:
+            - AuthenticationFilter
 
 eureka:
   client:
