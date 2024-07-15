@@ -21,4 +21,9 @@ public class MultiplicationController {
     public ResponseEntity<MultiplicationAttemptResponse> checkAttempt(@RequestBody @Valid MultiplicationAttemptRequest request) {
         return ResponseEntity.ok(multiplicationService.checkAttempt(request));
     }
+
+    @GetMapping("/attempt/results/{userId}")
+    public ResponseEntity<RecentMultiplicationAttemptResponse> getRecentAttempts(@PathVariable(name = "userId") String userId) {
+        return ResponseEntity.ok(multiplicationService.findRecentAttempts(userId));
+    }
 }
