@@ -2,9 +2,12 @@ package com.ljs.smg.multiplication;
 
 import com.ljs.smg.client.UserClient;
 import com.ljs.smg.client.UserExistsResponse;
+import com.ljs.smg.event.EventDispatcher;
+import com.ljs.smg.event.MultiplicationSolvedEvent;
 import com.ljs.smg.exception.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -29,6 +32,9 @@ class MultiplicationServiceTest {
     @Mock
     private UserClient userClient;
 
+    @Mock
+    private EventDispatcher eventDispatcher;
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -36,7 +42,8 @@ class MultiplicationServiceTest {
                 randomGeneratorService,
                 multiplicationAttemptRepository,
                 multiplicationMapper,
-                userClient
+                userClient,
+                eventDispatcher
         );
     }
 
@@ -86,6 +93,7 @@ class MultiplicationServiceTest {
         // then
         assertTrue(response.isCorrect());
         verify(multiplicationAttemptRepository).save(attempt);
+        verify(eventDispatcher).send(any(MultiplicationSolvedEvent.class));
     }
 
     @Test
@@ -118,6 +126,7 @@ class MultiplicationServiceTest {
         // then
         assertFalse(response.isCorrect());
         verify(multiplicationAttemptRepository).save(attempt);
+        verify(eventDispatcher).send(any(MultiplicationSolvedEvent.class));
     }
 
     @Test
