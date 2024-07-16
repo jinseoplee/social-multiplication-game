@@ -2,6 +2,8 @@ package com.ljs.smg.multiplication;
 
 import com.ljs.smg.client.UserClient;
 import com.ljs.smg.client.UserExistsResponse;
+import com.ljs.smg.event.EventDispatcher;
+import com.ljs.smg.event.MultiplicationSolvedEvent;
 import com.ljs.smg.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ public class MultiplicationService {
     private final MultiplicationAttemptRepository multiplicationAttemptRepository;
     private final MultiplicationMapper multiplicationMapper;
     private final UserClient userClient;
+    private final EventDispatcher eventDispatcher;
 
     public MultiplicationResponse createRandomMultiplication() {
         int factorA = randomGeneratorService.generateRandomFactor();
@@ -32,7 +35,15 @@ public class MultiplicationService {
         }
 
         boolean isCorrect = checkAnswer(request);
-        saveMultiplicationAttempt(request, isCorrect);
+        MultiplicationAttempt attempt = multiplicationMapper.toMultiplicationAttempt(request, isCorrect);
+        multiplicationAttemptRepository.save(attempt);
+
+        eventDispatcher.send(new MultiplicationSolvedEvent(
+                request.userId(),
+                attempt.getId(),
+                attempt.isCorrect()
+        ));
+
         return new MultiplicationAttemptResponse(isCorrect);
     }
 
@@ -43,11 +54,6 @@ public class MultiplicationService {
 
     private boolean checkAnswer(MultiplicationAttemptRequest request) {
         return request.answer() == request.factorA() * request.factorB();
-    }
-
-    private void saveMultiplicationAttempt(MultiplicationAttemptRequest request, boolean isCorrect) {
-        MultiplicationAttempt attempt = multiplicationMapper.toMultiplicationAttempt(request, isCorrect);
-        multiplicationAttemptRepository.save(attempt);
     }
 
     @Transactional(readOnly = true)

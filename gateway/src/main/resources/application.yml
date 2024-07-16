@@ -18,6 +18,12 @@ spring:
             - Path=/api/v1/multiplication/**
           filters:
             - AuthenticationFilter
+        - id: GAMIFICATION-SERVICE
+          uri: lb://GAMIFICATION-SERVICE
+          predicates:
+            - Path=/api/v1/gamification/**
+          filters:
+            - AuthenticationFilter
 
 eureka:
   client:
