@@ -11,9 +11,20 @@ spring:
     username: root
     password: 1234
 
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: root
+    password: 1234
+
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
   instance:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+multiplication:
+  exchange: multiplication_exchange
+  queue: gamification_multiplication_queue
+  routing-key: multiplication_routing_key
