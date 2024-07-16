@@ -3,6 +3,7 @@ package com.ljs.smg.game;
 import com.ljs.smg.badge.Badge;
 import com.ljs.smg.badge.BadgeCard;
 import com.ljs.smg.badge.BadgeCardRepository;
+import com.ljs.smg.exception.UserNotFoundException;
 import com.ljs.smg.score.ScoreCard;
 import com.ljs.smg.score.ScoreCardRepository;
 import lombok.RequiredArgsConstructor;
@@ -90,5 +91,18 @@ public class GameService {
         badgeCardRepository.save(badgeCard);
         log.info("사용자 ID: {}, 새로운 배지 획득: {}", userId, badge);
         return badgeCard;
+    }
+
+    @Transactional(readOnly = true)
+    public GameStatistics getUserStatistics(String userId) {
+        int totalScore = scoreCardRepository.getTotalScore(userId);
+        if (totalScore == 0) {
+            throw new UserNotFoundException("존재하지 않는 회원입니다.");
+        }
+        List<BadgeCard> badgeCards = badgeCardRepository.findByUserIdOrderByCreatedDateDesc(userId);
+        return new GameStatistics(userId, totalScore,
+                badgeCards.stream()
+                        .map(BadgeCard::getBadge)
+                        .toList());
     }
 }
