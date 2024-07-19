@@ -16,7 +16,7 @@ public record MultiplicationAttemptRequest(
         @Max(value = 9, message = "9 이하의 값을 입력해 주세요.")
         int factorB,
 
-        @Min(value = 1, message = "올바른 정답을 입력해 주세요.")
+        @Min(value = 1, message = "정답을 입력해 주세요.")
         int answer
 ) {
 }
