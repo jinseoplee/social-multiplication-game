@@ -177,4 +177,21 @@ class MultiplicationServiceTest {
         assertEquals(expectedResponse.multiplications().size(), actualResponse.multiplications().size());
         assertIterableEquals(expectedResponse.multiplications(), actualResponse.multiplications());
     }
+
+    @Test
+    void shouldThrowUserNotFoundExceptionWhenUserDoesNotExist() {
+        // given
+        String userId = "ljs";
+        String expectedMessage = "해당 ID를 가진 회원이 존재하지 않습니다.";
+
+        given(userClient.checkUserExists(userId)).willReturn(new UserExistsResponse(false));
+
+        // when
+        UserNotFoundException thrownException = assertThrows(UserNotFoundException.class, () -> {
+            multiplicationService.findRecentAttempts(userId);
+        });
+
+        // then
+        assertEquals(expectedMessage, thrownException.getMessage());
+    }
 }
