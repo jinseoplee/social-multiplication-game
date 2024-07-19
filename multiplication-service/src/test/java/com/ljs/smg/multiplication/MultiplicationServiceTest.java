@@ -138,7 +138,7 @@ class MultiplicationServiceTest {
     }
 
     @Test
-    void findRecentAttemptsTest() {
+    void shouldReturnRecentAttemptsWhenUserExists() {
         // given
         String userId = "ljs";
         int factorA = 2;
@@ -146,16 +146,22 @@ class MultiplicationServiceTest {
         int answer = 10;
         boolean isCorrect = true;
 
-        Multiplication multiplication = new Multiplication(1, factorA, factorB);
+        Multiplication multiplication = new Multiplication(23, factorA, factorB);
         List<MultiplicationAttempt> attempts = List.of(
-                new MultiplicationAttempt(1, userId, multiplication, answer, isCorrect, null, null)
+                MultiplicationAttempt.builder()
+                        .id(25)
+                        .userId(userId)
+                        .multiplication(multiplication)
+                        .answer(answer)
+                        .isCorrect(isCorrect)
+                        .build()
         );
 
-        given(multiplicationAttemptRepository.findTop5ByUserIdOrderByIdDesc(userId))
-                .willReturn(attempts);
+        given(userClient.checkUserExists(userId)).willReturn(new UserExistsResponse(true));
+        given(multiplicationAttemptRepository.findTop5ByUserIdOrderByIdDesc(userId)).willReturn(attempts);
 
         List<MultiplicationAttemptDetail> multiplications = List.of(
-                new MultiplicationAttemptDetail(1, factorA, factorB, answer, isCorrect)
+                new MultiplicationAttemptDetail(25, factorA, factorB, answer, isCorrect)
         );
 
         RecentMultiplicationAttemptResponse expectedResponse = new RecentMultiplicationAttemptResponse(
@@ -169,13 +175,6 @@ class MultiplicationServiceTest {
         // then
         assertEquals(expectedResponse.userId(), actualResponse.userId());
         assertEquals(expectedResponse.multiplications().size(), actualResponse.multiplications().size());
-
-        MultiplicationAttemptDetail expectedDetail = expectedResponse.multiplications().get(0);
-        MultiplicationAttemptDetail actualDetail = actualResponse.multiplications().get(0);
-
-        assertEquals(expectedDetail.factorA(), actualDetail.factorA());
-        assertEquals(expectedDetail.factorB(), actualDetail.factorB());
-        assertEquals(expectedDetail.answer(), actualDetail.answer());
-        assertEquals(expectedDetail.isCorrect(), actualDetail.isCorrect());
+        assertIterableEquals(expectedResponse.multiplications(), actualResponse.multiplications());
     }
 }
