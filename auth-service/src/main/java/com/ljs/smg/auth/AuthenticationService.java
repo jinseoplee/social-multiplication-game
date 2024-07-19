@@ -1,6 +1,6 @@
 package com.ljs.smg.auth;
 
-import com.ljs.smg.exception.PasswordException;
+import com.ljs.smg.exception.PasswordMismatchException;
 import com.ljs.smg.exception.UserIdAlreadyExistsException;
 import com.ljs.smg.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +55,7 @@ public class AuthenticationService {
                 });
 
         if (!request.passwordsMatch()) {
-            throw new PasswordException("비밀번호가 일치하지 않습니다.");
+            throw new PasswordMismatchException("비밀번호가 일치하지 않습니다.");
         }
     }
 }
