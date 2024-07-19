@@ -5,19 +5,23 @@ import com.ljs.smg.client.UserExistsResponse;
 import com.ljs.smg.event.EventDispatcher;
 import com.ljs.smg.event.MultiplicationSolvedEvent;
 import com.ljs.smg.exception.UserNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.ArgumentMatchers.any;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class MultiplicationServiceTest {
+
+    @InjectMocks
     private MultiplicationService multiplicationService;
 
     @Mock
@@ -35,20 +39,8 @@ class MultiplicationServiceTest {
     @Mock
     private EventDispatcher eventDispatcher;
 
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        multiplicationService = new MultiplicationService(
-                randomGeneratorService,
-                multiplicationAttemptRepository,
-                multiplicationMapper,
-                userClient,
-                eventDispatcher
-        );
-    }
-
     @Test
-    public void createRandomMultiplicationTest() {
+    void createRandomMultiplicationTest() {
         // given
         int factorA = 2;
         int factorB = 5;
@@ -64,7 +56,7 @@ class MultiplicationServiceTest {
     }
 
     @Test
-    public void checkCorrectAttemptTest() {
+    void checkCorrectAttemptTest() {
         // given
         String userId = "ljs";
         int factorA = 2;
@@ -97,7 +89,7 @@ class MultiplicationServiceTest {
     }
 
     @Test
-    public void checkIncorrectAttemptTest() {
+    void checkIncorrectAttemptTest() {
         // given
         String userId = "ljs";
         int factorA = 3;
@@ -130,7 +122,7 @@ class MultiplicationServiceTest {
     }
 
     @Test
-    public void checkAttemptWithNonExistentUserTest() {
+    void checkAttemptWithNonExistentUserTest() {
         // given
         String userId = "ljs";
         int factorA = 2;
@@ -146,7 +138,7 @@ class MultiplicationServiceTest {
     }
 
     @Test
-    public void findRecentAttemptsTest() {
+    void findRecentAttemptsTest() {
         // given
         String userId = "ljs";
         int factorA = 2;
