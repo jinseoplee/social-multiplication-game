@@ -5,19 +5,23 @@ import com.ljs.smg.client.UserExistsResponse;
 import com.ljs.smg.event.EventDispatcher;
 import com.ljs.smg.event.MultiplicationSolvedEvent;
 import com.ljs.smg.exception.UserNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.ArgumentMatchers.any;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class MultiplicationServiceTest {
+
+    @InjectMocks
     private MultiplicationService multiplicationService;
 
     @Mock
@@ -35,20 +39,8 @@ class MultiplicationServiceTest {
     @Mock
     private EventDispatcher eventDispatcher;
 
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        multiplicationService = new MultiplicationService(
-                randomGeneratorService,
-                multiplicationAttemptRepository,
-                multiplicationMapper,
-                userClient,
-                eventDispatcher
-        );
-    }
-
     @Test
-    public void createRandomMultiplicationTest() {
+    void createRandomMultiplicationTest() {
         // given
         int factorA = 2;
         int factorB = 5;
@@ -64,7 +56,7 @@ class MultiplicationServiceTest {
     }
 
     @Test
-    public void checkCorrectAttemptTest() {
+    void checkCorrectAttemptTest() {
         // given
         String userId = "ljs";
         int factorA = 2;
@@ -97,7 +89,7 @@ class MultiplicationServiceTest {
     }
 
     @Test
-    public void checkIncorrectAttemptTest() {
+    void checkIncorrectAttemptTest() {
         // given
         String userId = "ljs";
         int factorA = 3;
@@ -130,7 +122,7 @@ class MultiplicationServiceTest {
     }
 
     @Test
-    public void checkAttemptWithNonExistentUserTest() {
+    void checkAttemptWithNonExistentUserTest() {
         // given
         String userId = "ljs";
         int factorA = 2;
@@ -146,7 +138,7 @@ class MultiplicationServiceTest {
     }
 
     @Test
-    public void findRecentAttemptsTest() {
+    void shouldReturnRecentAttemptsWhenUserExists() {
         // given
         String userId = "ljs";
         int factorA = 2;
@@ -154,16 +146,22 @@ class MultiplicationServiceTest {
         int answer = 10;
         boolean isCorrect = true;
 
-        Multiplication multiplication = new Multiplication(1, factorA, factorB);
+        Multiplication multiplication = new Multiplication(23, factorA, factorB);
         List<MultiplicationAttempt> attempts = List.of(
-                new MultiplicationAttempt(1, userId, multiplication, answer, isCorrect, null, null)
+                MultiplicationAttempt.builder()
+                        .id(25)
+                        .userId(userId)
+                        .multiplication(multiplication)
+                        .answer(answer)
+                        .isCorrect(isCorrect)
+                        .build()
         );
 
-        given(multiplicationAttemptRepository.findTop5ByUserIdOrderByIdDesc(userId))
-                .willReturn(attempts);
+        given(userClient.checkUserExists(userId)).willReturn(new UserExistsResponse(true));
+        given(multiplicationAttemptRepository.findTop5ByUserIdOrderByIdDesc(userId)).willReturn(attempts);
 
         List<MultiplicationAttemptDetail> multiplications = List.of(
-                new MultiplicationAttemptDetail(1, factorA, factorB, answer, isCorrect)
+                new MultiplicationAttemptDetail(25, factorA, factorB, answer, isCorrect)
         );
 
         RecentMultiplicationAttemptResponse expectedResponse = new RecentMultiplicationAttemptResponse(
@@ -177,13 +175,23 @@ class MultiplicationServiceTest {
         // then
         assertEquals(expectedResponse.userId(), actualResponse.userId());
         assertEquals(expectedResponse.multiplications().size(), actualResponse.multiplications().size());
+        assertIterableEquals(expectedResponse.multiplications(), actualResponse.multiplications());
+    }
 
-        MultiplicationAttemptDetail expectedDetail = expectedResponse.multiplications().get(0);
-        MultiplicationAttemptDetail actualDetail = actualResponse.multiplications().get(0);
+    @Test
+    void shouldThrowUserNotFoundExceptionWhenUserDoesNotExist() {
+        // given
+        String userId = "ljs";
+        String expectedMessage = "해당 ID를 가진 회원이 존재하지 않습니다.";
 
-        assertEquals(expectedDetail.factorA(), actualDetail.factorA());
-        assertEquals(expectedDetail.factorB(), actualDetail.factorB());
-        assertEquals(expectedDetail.answer(), actualDetail.answer());
-        assertEquals(expectedDetail.isCorrect(), actualDetail.isCorrect());
+        given(userClient.checkUserExists(userId)).willReturn(new UserExistsResponse(false));
+
+        // when
+        UserNotFoundException thrownException = assertThrows(UserNotFoundException.class, () -> {
+            multiplicationService.findRecentAttempts(userId);
+        });
+
+        // then
+        assertEquals(expectedMessage, thrownException.getMessage());
     }
 }

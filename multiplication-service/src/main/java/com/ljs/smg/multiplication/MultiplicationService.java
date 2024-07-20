@@ -58,6 +58,11 @@ public class MultiplicationService {
 
     @Transactional(readOnly = true)
     public RecentMultiplicationAttemptResponse findRecentAttempts(String userId) {
+        boolean userExists = checkUserExists(userId);
+        if (!userExists) {
+            throw new UserNotFoundException("해당 ID를 가진 회원이 존재하지 않습니다.");
+        }
+
         List<MultiplicationAttempt> attempts = multiplicationAttemptRepository.findTop5ByUserIdOrderByIdDesc(userId);
 
         List<MultiplicationAttemptDetail> multiplications = attempts
