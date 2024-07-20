@@ -30,10 +30,10 @@ public class GameService {
             scoreCardRepository.save(scoreCard);
             log.info("사용자 ID: {}, 점수: {}점, 답안 ID: {}", userId, scoreCard.getScore(), attemptId);
 
-            int totalScore = scoreCardRepository.getTotalScore(userId);
+            int totalScore = scoreCardRepository.getTotalScore(userId).get();
             log.info("사용자 ID: {}, 총 점수: {}", userId, totalScore);
 
-            List<BadgeCard> badgeCards = processBadges(userId, totalScore, attemptId);
+            processBadges(userId, totalScore, attemptId);
         }
     }
 
@@ -95,10 +95,9 @@ public class GameService {
 
     @Transactional(readOnly = true)
     public GameStatistics getUserStatistics(String userId) {
-        int totalScore = scoreCardRepository.getTotalScore(userId);
-        if (totalScore == 0) {
-            throw new UserNotFoundException("존재하지 않는 회원입니다.");
-        }
+        int totalScore = scoreCardRepository.getTotalScore(userId)
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 회원입니다."));
+
         List<BadgeCard> badgeCards = badgeCardRepository.findByUserIdOrderByCreatedDateDesc(userId);
         return new GameStatistics(userId, totalScore,
                 badgeCards.stream()
