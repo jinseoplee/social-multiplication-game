@@ -3,6 +3,8 @@ package com.ljs.smg.game;
 import com.ljs.smg.badge.Badge;
 import com.ljs.smg.badge.BadgeCard;
 import com.ljs.smg.badge.BadgeCardRepository;
+import com.ljs.smg.client.MultiplicationAttemptDetail;
+import com.ljs.smg.client.MultiplicationClient;
 import com.ljs.smg.exception.UserNotFoundException;
 import com.ljs.smg.score.ScoreCard;
 import com.ljs.smg.score.ScoreCardRepository;
@@ -22,6 +24,9 @@ public class GameService {
 
     private final ScoreCardRepository scoreCardRepository;
     private final BadgeCardRepository badgeCardRepository;
+    private final MultiplicationClient multiplicationClient;
+
+    private static final int LUCKY_NUMBER = 7;
 
     @Transactional
     public void processCorrectAnswer(String userId, Integer attemptId, boolean isCorrect) {
@@ -57,6 +62,14 @@ public class GameService {
         if (scoreCardList.size() == 1 && !containsBadge(badgeCardList, Badge.FIRST_WON)) {
             BadgeCard firstWonBadge = giveBadgeToUser(userId, Badge.FIRST_WON);
             badgeCards.add(firstWonBadge);
+        }
+
+        // 행운의 숫자 배지
+        MultiplicationAttemptDetail attemptDetail = multiplicationClient.getMultiplicationAttempt(attemptId);
+        if (!containsBadge(badgeCardList, Badge.LUCKY_NUMBER) &&
+                (attemptDetail.factorA() == LUCKY_NUMBER && attemptDetail.factorB() == LUCKY_NUMBER)) {
+            BadgeCard luckyNumberBadge = giveBadgeToUser(userId, Badge.LUCKY_NUMBER);
+            badgeCards.add(luckyNumberBadge);
         }
 
         return badgeCards;
