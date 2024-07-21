@@ -17,12 +17,12 @@ public class MultiplicationController {
         return ResponseEntity.ok(multiplicationService.createRandomMultiplication());
     }
 
-    @PostMapping("/attempt")
+    @PostMapping("/attempts")
     public ResponseEntity<MultiplicationAttemptResponse> checkAttempt(@RequestBody @Valid MultiplicationAttemptRequest request) {
         return ResponseEntity.ok(multiplicationService.checkAttempt(request));
     }
 
-    @GetMapping("/attempt/results/{userId}")
+    @GetMapping("/attempts/results/{userId}")
     public ResponseEntity<RecentMultiplicationAttemptResponse> getRecentAttempts(@PathVariable(name = "userId") String userId) {
         return ResponseEntity.ok(multiplicationService.findRecentAttempts(userId));
     }
