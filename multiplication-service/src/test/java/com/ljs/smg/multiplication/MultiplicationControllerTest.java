@@ -19,8 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(MultiplicationController.class)
 class MultiplicationControllerTest {
@@ -112,5 +111,30 @@ class MultiplicationControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonRecentAttemptResponse.write(response).getJson()));
+    }
+
+    @Test
+    void getMultiplicationAttemptTest() throws Exception {
+        // given
+        int attemptId = 254;
+        int factorA = 2;
+        int factorB = 9;
+        int answer = 18;
+        boolean isCorrect = true;
+
+        MultiplicationAttemptDetail attemptDetail = new MultiplicationAttemptDetail(attemptId, factorA, factorB, answer, isCorrect);
+
+        given(multiplicationService.findMultiplicationAttempt(attemptId))
+                .willReturn(attemptDetail);
+
+        // when & then
+        mvc.perform(get("/api/v1/multiplication/attempts/{attemptId}", attemptId)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(attemptId))
+                .andExpect(jsonPath("$.factorA").value(factorA))
+                .andExpect(jsonPath("$.factorB").value(factorB))
+                .andExpect(jsonPath("$.answer").value(answer))
+                .andExpect(jsonPath("$.isCorrect").value(isCorrect));
     }
 }
