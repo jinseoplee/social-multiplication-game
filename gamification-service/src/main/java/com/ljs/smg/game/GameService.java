@@ -3,6 +3,8 @@ package com.ljs.smg.game;
 import com.ljs.smg.badge.Badge;
 import com.ljs.smg.badge.BadgeCard;
 import com.ljs.smg.badge.BadgeCardRepository;
+import com.ljs.smg.client.MultiplicationAttemptDetail;
+import com.ljs.smg.client.MultiplicationClient;
 import com.ljs.smg.exception.UserNotFoundException;
 import com.ljs.smg.score.ScoreCard;
 import com.ljs.smg.score.ScoreCardRepository;
@@ -22,6 +24,9 @@ public class GameService {
 
     private final ScoreCardRepository scoreCardRepository;
     private final BadgeCardRepository badgeCardRepository;
+    private final MultiplicationClient multiplicationClient;
+
+    private static final int LUCKY_NUMBER = 7;
 
     @Transactional
     public void processCorrectAnswer(String userId, Integer attemptId, boolean isCorrect) {
@@ -30,10 +35,10 @@ public class GameService {
             scoreCardRepository.save(scoreCard);
             log.info("사용자 ID: {}, 점수: {}점, 답안 ID: {}", userId, scoreCard.getScore(), attemptId);
 
-            int totalScore = scoreCardRepository.getTotalScore(userId);
+            int totalScore = scoreCardRepository.getTotalScore(userId).get();
             log.info("사용자 ID: {}, 총 점수: {}", userId, totalScore);
 
-            List<BadgeCard> badgeCards = processBadges(userId, totalScore, attemptId);
+            processBadges(userId, totalScore, attemptId);
         }
     }
 
@@ -57,6 +62,14 @@ public class GameService {
         if (scoreCardList.size() == 1 && !containsBadge(badgeCardList, Badge.FIRST_WON)) {
             BadgeCard firstWonBadge = giveBadgeToUser(userId, Badge.FIRST_WON);
             badgeCards.add(firstWonBadge);
+        }
+
+        // 행운의 숫자 배지
+        MultiplicationAttemptDetail attemptDetail = multiplicationClient.getMultiplicationAttempt(attemptId);
+        if (!containsBadge(badgeCardList, Badge.LUCKY_NUMBER) &&
+                (attemptDetail.factorA() == LUCKY_NUMBER && attemptDetail.factorB() == LUCKY_NUMBER)) {
+            BadgeCard luckyNumberBadge = giveBadgeToUser(userId, Badge.LUCKY_NUMBER);
+            badgeCards.add(luckyNumberBadge);
         }
 
         return badgeCards;
@@ -95,10 +108,9 @@ public class GameService {
 
     @Transactional(readOnly = true)
     public GameStatistics getUserStatistics(String userId) {
-        int totalScore = scoreCardRepository.getTotalScore(userId);
-        if (totalScore == 0) {
-            throw new UserNotFoundException("존재하지 않는 회원입니다.");
-        }
+        int totalScore = scoreCardRepository.getTotalScore(userId)
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 회원입니다."));
+
         List<BadgeCard> badgeCards = badgeCardRepository.findByUserIdOrderByCreatedDateDesc(userId);
         return new GameStatistics(userId, totalScore,
                 badgeCards.stream()

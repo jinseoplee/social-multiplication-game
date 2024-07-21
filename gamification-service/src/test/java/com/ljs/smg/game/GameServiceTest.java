@@ -5,17 +5,22 @@ import com.ljs.smg.badge.BadgeCard;
 import com.ljs.smg.badge.BadgeCardRepository;
 import com.ljs.smg.exception.UserNotFoundException;
 import com.ljs.smg.score.ScoreCardRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
+@ExtendWith(MockitoExtension.class)
 class GameServiceTest {
+
+    @InjectMocks
     private GameService gameService;
 
     @Mock
@@ -24,14 +29,8 @@ class GameServiceTest {
     @Mock
     private BadgeCardRepository badgeCardRepository;
 
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        gameService = new GameService(scoreCardRepository, badgeCardRepository);
-    }
-
     @Test
-    public void getUserStatisticsTest() {
+    void getUserStatisticsTest() {
         // given
         String userId = "ljs";
         int totalScore = 100;
@@ -44,7 +43,7 @@ class GameServiceTest {
                 .toList());
 
         given(scoreCardRepository.getTotalScore(userId))
-                .willReturn(totalScore);
+                .willReturn(Optional.of(totalScore));
         given(badgeCardRepository.findByUserIdOrderByCreatedDateDesc(userId))
                 .willReturn(badges);
 
@@ -59,11 +58,11 @@ class GameServiceTest {
     }
 
     @Test
-    public void userNotFoundTest() {
+    void userNotFoundTest() {
         // given
         String userId = "nonExistentUser";
         given(scoreCardRepository.getTotalScore(userId))
-                .willReturn(0);
+                .willReturn(Optional.empty());
 
         // when & then
         UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
