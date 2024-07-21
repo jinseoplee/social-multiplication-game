@@ -19,8 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(MultiplicationController.class)
 class MultiplicationControllerTest {
@@ -42,7 +41,7 @@ class MultiplicationControllerTest {
     }
 
     @Test
-    public void getRandomMultiplicationTest() throws Exception {
+    void getRandomMultiplicationTest() throws Exception {
         // given
         given(multiplicationService.createRandomMultiplication())
                 .willReturn(new MultiplicationResponse(2, 5));
@@ -59,12 +58,12 @@ class MultiplicationControllerTest {
     }
 
     @Test
-    public void checkCorrectAttemptTest() throws Exception {
+    void checkCorrectAttemptTest() throws Exception {
         checkAttempt("ljs", 2, 5, 10, true);
     }
 
     @Test
-    public void checkIncorrectAttemptTest() throws Exception {
+    void checkIncorrectAttemptTest() throws Exception {
         checkAttempt("ljs", 7, 9, 36, false);
     }
 
@@ -85,7 +84,7 @@ class MultiplicationControllerTest {
     }
 
     @Test
-    public void invalidAttemptRequestTest() throws Exception {
+    void invalidAttemptRequestTest() throws Exception {
         // given
         MultiplicationAttemptRequest request = new MultiplicationAttemptRequest("", 2, 8, 0);
 
@@ -97,7 +96,7 @@ class MultiplicationControllerTest {
     }
 
     @Test
-    public void getRecentAttemptsTest() throws Exception {
+    void getRecentAttemptsTest() throws Exception {
         // given
         String userId = "ljs";
         List<MultiplicationAttemptDetail> multiplications = List.of(
@@ -112,5 +111,30 @@ class MultiplicationControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonRecentAttemptResponse.write(response).getJson()));
+    }
+
+    @Test
+    void getMultiplicationAttemptTest() throws Exception {
+        // given
+        int attemptId = 254;
+        int factorA = 2;
+        int factorB = 9;
+        int answer = 18;
+        boolean isCorrect = true;
+
+        MultiplicationAttemptDetail attemptDetail = new MultiplicationAttemptDetail(attemptId, factorA, factorB, answer, isCorrect);
+
+        given(multiplicationService.findMultiplicationAttempt(attemptId))
+                .willReturn(attemptDetail);
+
+        // when & then
+        mvc.perform(get("/api/v1/multiplication/attempts/{attemptId}", attemptId)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(attemptId))
+                .andExpect(jsonPath("$.factorA").value(factorA))
+                .andExpect(jsonPath("$.factorB").value(factorB))
+                .andExpect(jsonPath("$.answer").value(answer))
+                .andExpect(jsonPath("$.isCorrect").value(isCorrect));
     }
 }

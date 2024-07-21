@@ -4,6 +4,7 @@ import com.ljs.smg.client.UserClient;
 import com.ljs.smg.client.UserExistsResponse;
 import com.ljs.smg.event.EventDispatcher;
 import com.ljs.smg.event.MultiplicationSolvedEvent;
+import com.ljs.smg.exception.MultiplicationAttemptNotFoundException;
 import com.ljs.smg.exception.UserNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -193,5 +195,59 @@ class MultiplicationServiceTest {
 
         // then
         assertEquals(expectedMessage, thrownException.getMessage());
+    }
+
+    @Test
+    void shouldReturnMultiplicationAttemptDetailWhenAttemptExists() {
+        // given
+        int attemptId = 35;
+        int factorA = 2;
+        int factorB = 5;
+        int answer = 10;
+        boolean isCorrect = true;
+
+        MultiplicationAttempt attempt = MultiplicationAttempt.builder()
+                .id(attemptId)
+                .userId("ljs")
+                .multiplication(
+                        Multiplication.builder()
+                                .factorA(factorA)
+                                .factorB(factorB)
+                                .build()
+                )
+                .answer(answer)
+                .isCorrect(isCorrect)
+                .build();
+
+        given(multiplicationAttemptRepository.findById(attemptId))
+                .willReturn(Optional.of(attempt));
+
+        // when
+        MultiplicationAttemptDetail detail = multiplicationService.findMultiplicationAttempt(attemptId);
+
+        // then
+        assertEquals(attemptId, detail.id());
+        assertEquals(factorA, detail.factorA());
+        assertEquals(factorB, detail.factorB());
+        assertEquals(answer, detail.answer());
+        assertEquals(isCorrect, detail.isCorrect());
+    }
+
+    @Test
+    void shouldThrowMultiplicationAttemptNotFoundExceptionWhenAttemptDoesNotExist() {
+        // given
+        int attemptId = 234;
+        String errorMessage = "곱셈 시도 결과가 존재하지 않습니다.";
+
+        given(multiplicationAttemptRepository.findById(attemptId))
+                .willReturn(Optional.empty());
+
+        // when
+        MultiplicationAttemptNotFoundException exception = assertThrows(
+                MultiplicationAttemptNotFoundException.class, () -> multiplicationService.findMultiplicationAttempt(attemptId)
+        );
+
+        // then
+        assertEquals(errorMessage, exception.getMessage());
     }
 }
