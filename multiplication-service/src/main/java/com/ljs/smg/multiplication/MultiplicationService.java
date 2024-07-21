@@ -4,6 +4,7 @@ import com.ljs.smg.client.UserClient;
 import com.ljs.smg.client.UserExistsResponse;
 import com.ljs.smg.event.EventDispatcher;
 import com.ljs.smg.event.MultiplicationSolvedEvent;
+import com.ljs.smg.exception.MultiplicationAttemptNotFoundException;
 import com.ljs.smg.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -77,5 +78,18 @@ public class MultiplicationService {
                 .toList();
 
         return new RecentMultiplicationAttemptResponse(userId, multiplications);
+    }
+
+    @Transactional(readOnly = true)
+    public MultiplicationAttemptDetail findMultiplicationAttempt(Integer attemptId) {
+        return multiplicationAttemptRepository.findById(attemptId)
+                .map(attempt -> new MultiplicationAttemptDetail(
+                        attempt.getId(),
+                        attempt.getMultiplication().getFactorA(),
+                        attempt.getMultiplication().getFactorB(),
+                        attempt.getAnswer(),
+                        attempt.isCorrect()
+                ))
+                .orElseThrow(() -> new MultiplicationAttemptNotFoundException());
     }
 }

@@ -2,6 +2,7 @@ package com.ljs.smg.handler;
 
 import com.ljs.smg.common.dto.ApiErrorResponse;
 import com.ljs.smg.common.dto.ExtraApiErrorResponse;
+import com.ljs.smg.exception.MultiplicationAttemptNotFoundException;
 import com.ljs.smg.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -46,6 +47,11 @@ public class GlobalExceptionHandler {
     // 404
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleUserNotFoundException(UserNotFoundException e) {
+        return buildResponseEntity(NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler(MultiplicationAttemptNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleMultiplicationAttemptNotFoundException(MultiplicationAttemptNotFoundException e) {
         return buildResponseEntity(NOT_FOUND, e.getMessage());
     }
 
