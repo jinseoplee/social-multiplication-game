@@ -42,7 +42,7 @@ class MultiplicationControllerTest {
     }
 
     @Test
-    public void getRandomMultiplicationTest() throws Exception {
+    void getRandomMultiplicationTest() throws Exception {
         // given
         given(multiplicationService.createRandomMultiplication())
                 .willReturn(new MultiplicationResponse(2, 5));
@@ -59,12 +59,12 @@ class MultiplicationControllerTest {
     }
 
     @Test
-    public void checkCorrectAttemptTest() throws Exception {
+    void checkCorrectAttemptTest() throws Exception {
         checkAttempt("ljs", 2, 5, 10, true);
     }
 
     @Test
-    public void checkIncorrectAttemptTest() throws Exception {
+    void checkIncorrectAttemptTest() throws Exception {
         checkAttempt("ljs", 7, 9, 36, false);
     }
 
@@ -85,7 +85,7 @@ class MultiplicationControllerTest {
     }
 
     @Test
-    public void invalidAttemptRequestTest() throws Exception {
+    void invalidAttemptRequestTest() throws Exception {
         // given
         MultiplicationAttemptRequest request = new MultiplicationAttemptRequest("", 2, 8, 0);
 
@@ -97,7 +97,7 @@ class MultiplicationControllerTest {
     }
 
     @Test
-    public void getRecentAttemptsTest() throws Exception {
+    void getRecentAttemptsTest() throws Exception {
         // given
         String userId = "ljs";
         List<MultiplicationAttemptDetail> multiplications = List.of(
