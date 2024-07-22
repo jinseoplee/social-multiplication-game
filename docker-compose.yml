@@ -22,7 +22,51 @@ services:
       RABBITMQ_DEFAULT_PASS: 1234
     networks:
       - social-multiplication-net
-      
+
+  service-discovery:
+    build:
+      context: ./service-discovery
+      dockerfile: Dockerfile
+    container_name: service-discovery
+    ports:
+      - "8761:8761"
+    networks:
+      - social-multiplication-net
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: gateway
+    ports:
+      - "8000:8000"
+    networks:
+      - social-multiplication-net
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    networks:
+      - social-multiplication-net
+  
+  multiplication-service:
+    build:
+      context: ./multiplication-service
+      dockerfile: Dockerfile
+    container_name: multiplication-service
+    networks:
+      - social-multiplication-net
+
+  gamification-service:
+    build:
+      context: ./gamification-service
+      dockerfile: Dockerfile
+    container_name: gamification-service
+    networks:
+      - social-multiplication-net
+
 volumes:
   mysql-data:
 
