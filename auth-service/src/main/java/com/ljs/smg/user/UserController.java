@@ -18,4 +18,9 @@ public class UserController {
     public ResponseEntity<UserExistsResponse> checkUserExists(@PathVariable String userId) {
         return ResponseEntity.ok(userService.checkUserExists(userId));
     }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable("userId") String userId) {
+        return ResponseEntity.ok(userService.getUserProfile(userId));
+    }
 }

@@ -4,6 +4,7 @@ import com.ljs.smg.client.UserClient;
 import com.ljs.smg.client.UserExistsResponse;
 import com.ljs.smg.event.EventDispatcher;
 import com.ljs.smg.event.MultiplicationSolvedEvent;
+import com.ljs.smg.exception.MultiplicationAttemptNotFoundException;
 import com.ljs.smg.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -58,6 +59,11 @@ public class MultiplicationService {
 
     @Transactional(readOnly = true)
     public RecentMultiplicationAttemptResponse findRecentAttempts(String userId) {
+        boolean userExists = checkUserExists(userId);
+        if (!userExists) {
+            throw new UserNotFoundException("해당 ID를 가진 회원이 존재하지 않습니다.");
+        }
+
         List<MultiplicationAttempt> attempts = multiplicationAttemptRepository.findTop5ByUserIdOrderByIdDesc(userId);
 
         List<MultiplicationAttemptDetail> multiplications = attempts
@@ -72,5 +78,18 @@ public class MultiplicationService {
                 .toList();
 
         return new RecentMultiplicationAttemptResponse(userId, multiplications);
+    }
+
+    @Transactional(readOnly = true)
+    public MultiplicationAttemptDetail findMultiplicationAttempt(Integer attemptId) {
+        return multiplicationAttemptRepository.findById(attemptId)
+                .map(attempt -> new MultiplicationAttemptDetail(
+                        attempt.getId(),
+                        attempt.getMultiplication().getFactorA(),
+                        attempt.getMultiplication().getFactorB(),
+                        attempt.getAnswer(),
+                        attempt.isCorrect()
+                ))
+                .orElseThrow(() -> new MultiplicationAttemptNotFoundException());
     }
 }

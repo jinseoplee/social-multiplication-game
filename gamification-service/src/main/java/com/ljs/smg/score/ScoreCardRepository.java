@@ -6,13 +6,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ScoreCardRepository extends JpaRepository<ScoreCard, Integer> {
 
     @Query("SELECT SUM(s.score) " +
             "FROM ScoreCard s " +
             "WHERE s.userId = :userId")
-    int getTotalScore(@Param("userId") String userId);
+    Optional<Integer> getTotalScore(@Param("userId") String userId);
 
     @Query("SELECT NEW com.ljs.smg.leaderboard.LeaderboardRow(s.userId, SUM(s.score)) " +
             "FROM ScoreCard s " +
