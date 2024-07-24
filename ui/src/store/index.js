@@ -15,6 +15,17 @@ const store = createStore({
     setAccessToken(state, accessToken) {
       state.accessToken = accessToken;
     },
+    clearUserData(state) {
+      state.userId = "";
+      state.accessToken = "";
+    },
+  },
+  actions: {
+    logout({ commit }) {
+      commit("clearUserData");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("accessToken");
+    },
   },
   getters: {
     isAuthenticated(state) {
