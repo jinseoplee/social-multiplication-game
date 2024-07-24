@@ -79,9 +79,16 @@ export default {
       const { valid } = await this.$refs.form.validate();
       if (valid) {
         try {
+          // 인증 요청을 보내고 응답을 받는다.
           const response = await authenticate(this.credentials);
           const { accessToken } = response.data;
-          localStorage.setItem("accessToken", accessToken);
+
+          // Vuex 스토어에 userId와 accessToken을 저장한다.
+          this.$store.commit("setUserId", this.credentials.userId);
+          this.$store.commit("setAccessToken", accessToken);
+
+          // 로그인 후 리다이렉트한다.
+          this.$router.push("/");
         } catch (error) {
           this.handleServerError(error);
         }
