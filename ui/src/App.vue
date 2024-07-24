@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <AppHeader :appTitle="appTitle" :barItems="barItems" />
+    <AppHeader :appTitle="appTitle" :barItems="filterBarItems" />
 
     <v-main>
       <router-view></router-view>
@@ -13,6 +13,7 @@
 <script>
 import AppHeader from "./components/AppHeader.vue";
 import AppFooter from "./components/AppFooter.vue";
+import { mapGetters } from "vuex";
 
 export default {
   name: "App",
@@ -36,6 +37,16 @@ export default {
         },
       ],
     };
+  },
+  computed: {
+    ...mapGetters(["isAuthenticated"]),
+    filterBarItems() {
+      return this.isAuthenticated
+        ? this.barItems.filter(
+            (item) => item.title !== "Sign Up" && item.title !== "Sign In"
+          )
+        : this.barItems;
+    },
   },
 };
 </script>
