@@ -15,7 +15,7 @@
 ## 아키텍처
 
 <p align="center">
-    <img src="https://github.com/user-attachments/assets/b848fa40-1880-4953-9f43-66fd30ca96cc" alt="architecture"/>
+    <img src="https://github.com/user-attachments/assets/cc42d8b9-4ea3-4a32-96c2-88fabc1053a3" alt="architecture"/>
 </p>
 
 ## 기술 스택
