@@ -6,4 +6,7 @@ const GAMIFICATION_SERVICE = "/api/v1/gamification";
 const getUserStatistics = (userId) =>
   get(`${GAMIFICATION_SERVICE}/statistics?userId=${userId}`);
 
-export { getUserStatistics };
+// 리더보드 가져오기
+const getLeaderboard = () => get(`${GAMIFICATION_SERVICE}/leaderboard`);
+
+export { getUserStatistics, getLeaderboard };
