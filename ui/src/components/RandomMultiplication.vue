@@ -85,7 +85,11 @@ export default {
         }
 
         this.showAlert = true;
-        this.$emit("refresh-attempts");
+
+        setTimeout(() => {
+          this.$emit("refresh-attempts");
+          this.$emit("refresh-statistics");
+        }, 500);
       } catch {
         this.resultType = "error";
         this.resultMessage = "정답을 검증하는 데 문제가 발생했습니다.";
