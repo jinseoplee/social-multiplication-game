@@ -89,6 +89,7 @@ export default {
         setTimeout(() => {
           this.$emit("refresh-attempts");
           this.$emit("refresh-statistics");
+          this.$emit("refresh-leaderboard");
         }, 500);
       } catch {
         this.resultType = "error";
